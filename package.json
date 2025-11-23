@@ -1,0 +1,89 @@
+{
+  "name": "ui-auto-specification",
+  "version": "0.1.2",
+  "description": "On-demand Vue component resolver with automatic default props and placeholder rules.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./runtime": {
+      "types": "./dist/runtime.d.ts",
+      "import": "./dist/runtime.js",
+      "require": "./dist/runtime.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "package.json"
+  ],
+  "keywords": [
+    "vue",
+    "components",
+    "resolver",
+    "unplugin",
+    "auto",
+    "placeholder",
+    "ui"
+  ],
+  "scripts": {
+    "clean": "rimraf dist .turbo",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" \"tests/**/*.ts\"",
+    "lint:fix": "npm run lint -- --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc -p tsconfig.build.json --noEmit",
+    "build": "npm run clean && tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "docs": "typedoc",
+    "changeset": "changeset",
+    "release": "changeset version && npm install && npm run build && changeset publish",
+    "prepare": "husky install",
+    "prepublishOnly": "npm run build",
+    "example": "tsx examples/basic-usage.ts"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,json,md}": "prettier --write",
+    "src/**/*.{ts,tsx}": "eslint --cache --fix"
+  },
+  "engines": {
+    "node": ">=18.18"
+  },
+  "packageManager": "npm@10.9.2",
+  "author": "Dreamer-KJ",
+  "license": "MIT",
+  "peerDependencies": {
+    "unplugin-vue-components": "^0.27.0",
+    "vue": "^3.3.0"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.9",
+    "@types/node": "^22.8.0",
+    "@typescript-eslint/eslint-plugin": "^8.8.1",
+    "@typescript-eslint/parser": "^8.8.1",
+    "@vitest/coverage-v8": "^2.1.5",
+    "eslint": "^9.12.0",
+    "eslint-config-prettier": "^9.1.0",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.2.4",
+    "tsx": "^4.19.2",
+    "typedoc": "^0.26.11",
+    "typescript": "^5.6.3",
+    "unplugin-vue-components": "^0.27.0",
+    "vitest": "^2.1.5",
+    "vue": "^3.5.11"
+  }
+}
