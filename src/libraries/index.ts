@@ -1,5 +1,14 @@
 import type { UiLibrary, UiLibraryConfig } from '../types';
 
+const stripPrefix = (componentName: string, prefix: string) =>
+  componentName.startsWith(prefix) ? componentName.slice(prefix.length) : componentName;
+
+const toKebabCase = (value: string) =>
+  value
+    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+    .replace(/[\s_]+/g, '-')
+    .toLowerCase();
+
 export const UI_LIBRARIES: Record<UiLibrary, UiLibraryConfig> = {
   vant: {
     name: 'vant',
@@ -7,7 +16,7 @@ export const UI_LIBRARIES: Record<UiLibrary, UiLibraryConfig> = {
     packageName: 'vant',
     exportPrefix: false,
     importStyle: (componentName) => {
-      const name = componentName.replace(/^Van/, '').toLowerCase();
+      const name = toKebabCase(stripPrefix(componentName, 'Van'));
       return `vant/es/${name}/style`;
     }
   },
@@ -17,7 +26,7 @@ export const UI_LIBRARIES: Record<UiLibrary, UiLibraryConfig> = {
     packageName: 'element-plus',
     exportPrefix: 'El',
     importStyle: (componentName) => {
-      const name = componentName.replace(/^El/, '').toLowerCase();
+      const name = toKebabCase(stripPrefix(componentName, 'El'));
       return `element-plus/es/components/${name}/style/css`;
     }
   },
@@ -34,7 +43,7 @@ export const UI_LIBRARIES: Record<UiLibrary, UiLibraryConfig> = {
     packageName: '@varlet/ui',
     exportPrefix: false,
     importStyle: (componentName) => {
-      const name = componentName.replace(/^Var/, '').toLowerCase();
+      const name = toKebabCase(stripPrefix(componentName, 'Var'));
       return `@varlet/ui/es/${name}/style`;
     }
   },
@@ -44,7 +53,7 @@ export const UI_LIBRARIES: Record<UiLibrary, UiLibraryConfig> = {
     packageName: 'ant-design-vue',
     exportPrefix: false,
     importStyle: (componentName) => {
-      const name = componentName.replace(/^A/, '').toLowerCase();
+      const name = toKebabCase(stripPrefix(componentName, 'A'));
       return `ant-design-vue/es/${name}/style`;
     }
   }

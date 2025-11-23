@@ -1,14 +1,25 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { ComponentResolver } from 'unplugin-vue-components';
 import { getLibraryConfig } from '../libraries';
 import * as presets from '../presets';
 import type { UiEnhanceOptions, UiLibrary, UiLibraryConfig, UiRule, UiRules } from '../types';
-import packageJson from '../../package.json';
 
-const pkgMeta = packageJson as { name?: unknown };
-const packageName =
-  typeof pkgMeta.name === 'string' ? pkgMeta.name : 'ui-auto-specification';
+const __dirname = path.dirname(fileURLToPath((import.meta as { url: string }).url));
+const packageJsonPath = path.resolve(__dirname, '../../package.json');
+let packageName = 'ui-auto-specification';
+
+try {
+  if (fs.existsSync(packageJsonPath)) {
+    const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+    if (typeof pkg?.name === 'string') {
+      packageName = pkg.name;
+    }
+  }
+} catch {
+  // Fallback to default name when package.json is unavailable
+}
 
 const DEFAULT_CACHE_DIR = path.resolve(
   process.cwd(),
