@@ -83,6 +83,16 @@ npm run lint      # ESLint + TypeScript 检查
 npm run docs      # 生成 API 文档（Typedoc）
 ```
 
+## 常见问题
+```markdown
+Q: 如何添加新的 UI 库预设？
+A: 在 `src/presets/` 目录下创建新的预设文件，定义组件规则后导出即可。
+Q: 能否自定义组件的默认属性？
+A: 可以，通过 `rules` 选项为指定组件配置 `defaults` 和 `transform` 函数。
+Q: 组件增强文件生成在哪里？
+A: 生成在项目的node_modules/.cache/ui-auto-specification/.enhanced目录中。
+```
+
 欢迎提交 Issue / PR，一起完善更多 UI 库预设或规则。
 
 ## 许可协议
