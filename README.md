@@ -93,6 +93,35 @@ A: 可以，通过 `rules` 选项为指定组件配置 `defaults` 和 `transform
 
 Q: 组件增强文件生成在哪里？
 A: 生成在项目的node_modules/.cache/ui-auto-specification/.enhanced目录中。
+
+Q: 为什么在 Vite 6+ 中使用 Element Plus 会报 `dayjs` 相关错误？
+A: Vite 6 开始对 ESM 条件解析更严格，Element Plus 在内部引用 `dayjs` 插件时会落到 CommonJS 入口（如 `dayjs/plugin/utc.js`），Vite 会报「Failed to resolve import」或在运行期触发 `require` 未定义。解决方法是在 `vite.config.ts` 中把 `dayjs` 及其插件指向官方 ESM 版本，并确保在 `optimizeDeps.include` 中预构建 `dayjs`：
+1. 使用 `createRequire` 定位 `dayjs/esm/index.js` 并记录其目录。
+2. 在 `resolve.alias` 添加 `{ find: /^dayjs$/, replacement: dayjsEsmIndex }` 锁主入口。
+3. 添加 `{ find: /^dayjs\/plugin\/(.*)\.js$/, replacement: \`${dayjsEsmRoot}/plugin/$1/index.js\` }` 让插件引用落到 `esm` 目录，并在 `optimizeDeps.include` 中包含 `dayjs`，即可在 Vite 6+ 正常使用 Element Plus。
+
+```ts
+// vite.config.ts 示意
+import { createRequire } from 'node:module'
+import path from 'node:path'
+import { defineConfig } from 'vite'
+
+const require = createRequire(import.meta.url)
+const dayjsEsmIndex = require.resolve('dayjs/esm/index.js')
+const dayjsEsmRoot = path.dirname(dayjsEsmIndex)
+
+export default defineConfig({
+  resolve: {
+    alias: [
+      { find: /^dayjs$/, replacement: dayjsEsmIndex },
+      { find: /^dayjs\/plugin\/(.*)\.js$/, replacement: `${dayjsEsmRoot}/plugin/$1/index.js` },
+    ],
+  },
+  optimizeDeps: {
+    include: ['dayjs'],
+  },
+})
+```
 ```
 
 欢迎提交 Issue / PR，一起完善更多 UI 库预设或规则。
