@@ -18,7 +18,7 @@ try {
     }
   }
 } catch {
-  // Fallback to default name when package.json is unavailable
+  // 当package.json不可用时回退到默认名称
 }
 
 const DEFAULT_CACHE_DIR = path.resolve(

@@ -1,6 +1,6 @@
 {
   "name": "ui-auto-specification",
-  "version": "0.1.3",
+  "version": "0.1.5",
   "description": "On-demand Vue component resolver with automatic default props and placeholder rules.",
   "type": "module",
   "main": "./dist/index.cjs",
