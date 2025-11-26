@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig(({ watch }) => ({
-  entry: ['src/index.ts', 'src/runtime.ts'],
+  entry: ['src/index.ts', 'src/runtime.ts', 'src/vite.ts'],
   format: ['esm', 'cjs'],
   dts: true,
   sourcemap: true,

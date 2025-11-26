@@ -2,9 +2,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { ComponentResolver } from 'unplugin-vue-components';
-import { getLibraryConfig } from '../libraries';
+import { getLibraryUserConfig } from '@/config';
+import { getLibraryConfig } from '@/libraries';
 import * as presets from '../presets';
-import type { UiEnhanceOptions, UiLibrary, UiLibraryConfig, UiRule, UiRules } from '../types';
+import type { UiEnhanceOptions, UiLibrary, UiLibraryConfig, UiRule, UiRules } from '@/types';
 
 const __dirname = path.dirname(fileURLToPath((import.meta as { url: string }).url));
 const packageJsonPath = path.resolve(__dirname, '../../package.json');
@@ -12,8 +13,9 @@ let packageName = 'ui-auto-specification';
 
 try {
   if (fs.existsSync(packageJsonPath)) {
-    const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-    if (typeof pkg?.name === 'string') {
+    const file = fs.readFileSync(packageJsonPath, 'utf-8');
+    const pkg = JSON.parse(file) as { name?: string };
+    if (typeof pkg.name === 'string') {
       packageName = pkg.name;
     }
   }
@@ -78,6 +80,65 @@ ${segments.join(',\n')}
 }`;
 }
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isUiRule(value: unknown): value is UiRule {
+  if (!isPlainObject(value)) return false;
+  if ('defaults' in value && value.defaults !== undefined && !isPlainObject(value.defaults)) return false;
+  if ('autoPlaceholder' in value) {
+    const auto = value.autoPlaceholder;
+    if (auto !== undefined && typeof auto !== 'boolean' && typeof auto !== 'function') {
+      return false;
+    }
+  }
+  if ('transform' in value) {
+    const transform = value.transform;
+    if (transform !== undefined && typeof transform !== 'function') {
+      return false;
+    }
+  }
+  return true;
+}
+
+function isUiRules(value: unknown): value is UiRules {
+  if (!isPlainObject(value)) return false;
+  return Object.values(value).every(isUiRule);
+}
+
+interface LibraryOverrides {
+  rules?: UiRules;
+  usePreset?: boolean;
+}
+
+function toLibraryOverrides(value: unknown): LibraryOverrides | undefined {
+  if (!isPlainObject(value)) {
+    return undefined;
+  }
+
+  const normalized: LibraryOverrides = {};
+  let hasOverride = false;
+
+  if ('rules' in value) {
+    const maybeRules = value.rules;
+    if (isUiRules(maybeRules)) {
+      normalized.rules = maybeRules;
+      hasOverride = true;
+    }
+  }
+
+  if ('usePreset' in value) {
+    const maybeUsePreset = value.usePreset;
+    if (typeof maybeUsePreset === 'boolean') {
+      normalized.usePreset = maybeUsePreset;
+      hasOverride = true;
+    }
+  }
+
+  return hasOverride ? normalized : undefined;
+}
+
 function createEnhancedComponent(componentName: string, rule: UiRule, libraryConfig: UiLibraryConfig): string {
   let importName: string;
   if (libraryConfig.exportPrefix === false) {
@@ -135,10 +196,25 @@ export function createUiEnhanceResolver(options: UiEnhanceOptions): ComponentRes
   };
 }
 
-export function createUiEnhance(library: UiLibrary, customRules?: UiRules, _options?: { resolver?: any }) {
-  return createUiEnhanceResolver({
-    library,
-    rules: customRules,
-    usePreset: true
-  });
+export function createUiEnhance(library: UiLibrary): ComponentResolver {
+  return {
+    type: 'component',
+    resolve: (name: string) => {
+      const overrides = toLibraryOverrides(getLibraryUserConfig(library));
+      const resolverOptions: UiEnhanceOptions = { library };
+      if (overrides?.rules) {
+        resolverOptions.rules = overrides.rules;
+      }
+      if (overrides?.usePreset !== undefined) {
+        resolverOptions.usePreset = overrides.usePreset;
+      }
+
+      const resolver = createUiEnhanceResolver(resolverOptions);
+
+      if (typeof resolver === 'function') {
+        return resolver(name);
+      }
+      return resolver.resolve(name);
+    }
+  };
 }

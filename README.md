@@ -23,10 +23,11 @@ npm install ui-auto-specification unplugin-vue-components
 // vite.config.ts
 import { defineConfig } from 'vite';
 import Components from 'unplugin-vue-components/vite';
-import { createUiEnhance } from 'ui-auto-specification';
+import { createUiEnhance, uiAutoSpecificationPlugin } from 'ui-auto-specification';
 
 export default defineConfig({
   plugins: [
+    uiAutoSpecificationPlugin(),
     Components({
       resolvers: [
         // 使用内置预设（Element Plus）
@@ -39,23 +40,37 @@ export default defineConfig({
 
 ## 进阶配置
 
-```ts
-import { createUiEnhance } from 'ui-auto-specification';
+### 项目级配置文件
 
-const customResolver = createUiEnhance('element-plus', {
-  ElInput: {
-    defaults: { clearable: false },
-    transform: (props) => ({ ...props, size: 'large' })
+插件会在项目根目录查找 `uas.config.*` 或 `usa.config.*`（支持 `ts/mts/cts/js/mjs/cjs`）。
+在该文件中使用 `defineUasConfig` 描述各 UI 库的规则与开关：
+
+```ts
+// uas.config.ts
+import { defineUasConfig } from 'ui-auto-specification';
+
+export default defineUasConfig({
+  'element-plus': {
+    usePreset: true,
+    rules: {
+      ElInput: {
+        defaults: { clearable: false },
+        transform: (props) => ({ ...props, size: 'large' })
+      }
+    }
   }
 });
 
-// 结合自定义 resolver 使用
-Components({ resolvers: [customResolver] });
 ```
 
-### 常用选项
+启用 `uiAutoSpecificationPlugin()` 后，`createUiEnhance('element-plus')` 会自动读取该配置；
+如果没有配置文件，则回退到预设行为。
 
-- `library`: UI 库名称或自定义配置
+> 提示：即使 Vite 插件稍后才加载配置，也无需重新声明 resolver——`createUiEnhance` 会在每次解析组件时获取最新的 `uas.config.*` 内容。
+
+### 常用配置键
+
+- `library`: `createUiEnhance` 的 UI 库名称或自定义配置
 - `rules`: 针对组件的自定义规则表
 - `usePreset`: 是否启用内置预设（默认 `true`）
 

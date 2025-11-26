@@ -1,3 +1,3 @@
-import type { UiRules } from '../types';
+import type { UiRules } from '@/types';
 
 export const ElementPlusPreset: UiRules = {};

@@ -1,4 +1,4 @@
-import type { UiLibrary, UiLibraryConfig } from '../types';
+import type { UiLibrary, UiLibraryConfig } from '@/types';
 
 const stripPrefix = (componentName: string, prefix: string) =>
   componentName.startsWith(prefix) ? componentName.slice(prefix.length) : componentName;
