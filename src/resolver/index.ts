@@ -1,27 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import type { ComponentResolver } from 'unplugin-vue-components';
 import { getLibraryUserConfig } from '@/config';
 import { getLibraryConfig } from '@/libraries';
 import * as presets from '../presets';
 import type { UiEnhanceOptions, UiLibrary, UiLibraryConfig, UiRule, UiRules } from '@/types';
+import packageJson from '../../package.json';
 
-const __dirname = path.dirname(fileURLToPath((import.meta as { url: string }).url));
-const packageJsonPath = path.resolve(__dirname, '../../package.json');
-let packageName = 'ui-auto-specification';
-
-try {
-  if (fs.existsSync(packageJsonPath)) {
-    const file = fs.readFileSync(packageJsonPath, 'utf-8');
-    const pkg = JSON.parse(file) as { name?: string };
-    if (typeof pkg.name === 'string') {
-      packageName = pkg.name;
-    }
-  }
-} catch {
-  // 当package.json不可用时回退到默认名称
-}
+const packageName = typeof packageJson.name === 'string' ? packageJson.name : 'ui-auto-specification';
 
 const DEFAULT_CACHE_DIR = path.resolve(
   process.cwd(),
@@ -44,6 +30,16 @@ function ensureCacheDir() {
   if (!fs.existsSync(ENHANCED_DIR)) {
     fs.mkdirSync(ENHANCED_DIR, { recursive: true });
   }
+}
+
+export function clearEnhancedCache() {
+  if (fs.existsSync(ENHANCED_DIR)) {
+    fs.rmSync(ENHANCED_DIR, { recursive: true, force: true });
+  }
+}
+
+export function getEnhancedCacheDir(): string {
+  return ENHANCED_DIR;
 }
 
 function indentMultiline(value: string, indent = 2): string {

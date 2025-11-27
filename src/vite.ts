@@ -3,6 +3,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { Plugin, ViteDevServer } from 'vite';
 import { setResolvedConfig, setUserProjectRoot } from './config';
+import { clearEnhancedCache } from './resolver';
 import type {
   UiAutoSpecificationConfig,
   UiAutoSpecificationLibraryConfig,
@@ -212,6 +213,11 @@ export function uiAutoSpecificationPlugin(): Plugin {
       setUserProjectRoot(rootDir);
       lastConfigPath = findConfigFile(rootDir);
       await updateConfig(lastConfigPath);
+    },
+    async buildStart() {
+      // 每次构建开始时清空缓存，确保使用最新配置生成组件
+      clearEnhancedCache();
+      console.log('[ui-auto-specification] 构建开始，已清空缓存目录');
     },
     configureServer(server) {
       if (!rootDir) {
