@@ -231,7 +231,40 @@ const rule: Rule.RuleModule = {
                 name: { type: 'string' },
                 components: {
                   type: 'array',
-                  items: { $ref: '#/properties/components/items' }
+                  items: {
+                    type: 'object',
+                    required: ['component', 'attributes'],
+                    properties: {
+                      component: { type: 'string' },
+                      matchNames: {
+                        type: 'array',
+                        items: { type: 'string' }
+                      },
+                      displayName: { type: 'string' },
+                      library: { type: 'string' },
+                      attributes: {
+                        type: 'array',
+                        items: {
+                          anyOf: [
+                            { type: 'string' },
+                            {
+                              type: 'object',
+                              required: ['name'],
+                              properties: {
+                                name: { type: 'string' },
+                                allowEmpty: { type: 'boolean' },
+                                reason: { type: 'string' },
+                                suggestion: { type: 'string' }
+                              },
+                              additionalProperties: false
+                            }
+                          ]
+                        },
+                        minItems: 1
+                      }
+                    },
+                    additionalProperties: false
+                  }
                 }
               },
               additionalProperties: false
