@@ -177,7 +177,7 @@ function attributeValueIsEmpty(attr: TemplateAttribute) {
 const rule: Rule.RuleModule = {
   meta: {
     docs: {
-      description: '要求指定 UI 组件必须声明关键属性，例如 Element Plus 的 <el-input> 需要 maxlength。',
+      description: '规范组件必须包含特定属性',
       recommended: false
     },
     type: 'suggestion',
