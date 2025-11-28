@@ -1,6 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { ComponentResolver } from 'unplugin-vue-components';
+import type {
+  ComponentResolveResult,
+  ComponentResolver,
+  ComponentResolverFunction,
+  ComponentResolverObject
+} from '@/types/component-resolver';
 import { getLibraryUserConfig } from '@/config';
 import { getLibraryConfig } from '@/libraries';
 import * as presets from '../presets';
@@ -135,6 +140,30 @@ function toLibraryOverrides(value: unknown): LibraryOverrides | undefined {
   return hasOverride ? normalized : undefined;
 }
 
+function isResolverFunction(resolver: ComponentResolver): resolver is ComponentResolverFunction {
+  return typeof resolver === 'function';
+}
+
+function isResolverObject(resolver: ComponentResolver): resolver is ComponentResolverObject {
+  if (typeof resolver !== 'object' || resolver === null) {
+    return false;
+  }
+  if (!('resolve' in resolver)) {
+    return false;
+  }
+  return typeof resolver.resolve === 'function';
+}
+
+function invokeComponentResolver(resolver: ComponentResolver, name: string): ComponentResolveResult {
+  if (isResolverFunction(resolver)) {
+    return resolver(name);
+  }
+  if (isResolverObject(resolver)) {
+    return resolver.resolve(name);
+  }
+  return undefined;
+}
+
 function createEnhancedComponent(componentName: string, rule: UiRule, libraryConfig: UiLibraryConfig): string {
   let importName: string;
   if (libraryConfig.exportPrefix === false) {
@@ -206,11 +235,7 @@ export function createUiEnhance(library: UiLibrary): ComponentResolver {
       }
 
       const resolver = createUiEnhanceResolver(resolverOptions);
-
-      if (typeof resolver === 'function') {
-        return resolver(name);
-      }
-      return resolver.resolve(name);
+      return invokeComponentResolver(resolver, name);
     }
   };
 }

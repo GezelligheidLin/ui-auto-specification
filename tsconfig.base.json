@@ -19,7 +19,8 @@
     "paths": {
       "@/*": ["src/*"],
       "ui-auto-specification": ["./src"],
-      "ui-auto-specification/vite": ["./src/vite.ts"]
+      "ui-auto-specification/vite": ["./src/vite.ts"],
+      "ui-auto-specification/eslint": ["./src/eslint/index.ts"]
     }
   },
   "include": ["src", "tests", "typedoc.ts"],

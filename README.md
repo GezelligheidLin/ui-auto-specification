@@ -9,6 +9,7 @@
 - ✨ 自动合并默认属性、生成 placeholder、执行自定义 `transform`
 - 🌲 每个组件在首次解析时动态生成增强文件，天然支持 tree-shaking
 - ⚙️ npm-quick-template 驱动，提供完整的 TypeScript、Lint、Test、Docs 流程
+- 🛡️ 自带可扩展的 ESLint 插件，强制关键 UI 属性在评审前即被发现
 
 ## 安装
 
@@ -73,6 +74,81 @@ export default defineUasConfig({
 - `library`: `createUiEnhance` 的 UI 库名称或自定义配置
 - `rules`: 针对组件的自定义规则表
 - `usePreset`: 是否启用内置预设（默认 `true`）
+
+## ESLint 静态规则
+
+当团队希望在编译前就强制 Element Plus 等组件带上 `maxlength`、`show-word-limit` 等关键属性时，可以引入内置的 ESLint 插件：
+
+```ts
+// eslint.config.mjs（Flat Config）
+import pluginVue from 'eslint-plugin-vue';
+import { uiAutoSpecificationEslintPlugin } from 'ui-auto-specification/eslint';
+
+export default [
+  pluginVue.configs['flat/essential'],
+  uiAutoSpecificationEslintPlugin.configs.recommended
+];
+```
+
+经典配置同样适用：
+
+```js
+// .eslintrc.cjs
+module.exports = {
+  extends: ['plugin:vue/vue3-essential'],
+  plugins: ['ui-auto-specification'],
+  rules: {
+    'ui-auto-specification/require-component-attributes': [
+      'warn',
+      {
+        components: [
+          {
+            component: 'ElInput',
+            matchNames: ['el-input'],
+            attributes: [
+              { name: 'maxlength', reason: '后端字段统一 50 个字符内' },
+              { name: 'show-word-limit' }
+            ]
+          }
+        ],
+        libraries: [
+          {
+            name: 'vant',
+            components: [
+              {
+                component: 'VanField',
+                matchNames: ['van-field'],
+                attributes: ['maxlength']
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+};
+```
+
+可导入的 TypeScript 类型（`RequireComponentAttributesRuleOptions`、`ComponentRuleGroup` 等）能为复杂的企业级表单规范提供提示与补全：
+
+```ts
+import type { RequireComponentAttributesRuleOptions } from 'ui-auto-specification/eslint';
+
+const elementRule: RequireComponentAttributesRuleOptions = {
+  components: [
+    {
+      component: 'ElInputNumber',
+      matchNames: ['el-input-number'],
+      attributes: [
+        { name: 'min', reason: '防止越界' },
+        { name: 'max', reason: '防止越界' }
+      ]
+    }
+  ]
+};
+```
+
+`uiAutoSpecificationEslintPlugin.configs.recommended` 默认内置了一套 Element Plus 规则，可直接叠加到现有 Vue/Vite ESLint 配置中。
 
 ## 目录结构
 

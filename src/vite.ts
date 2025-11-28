@@ -214,7 +214,7 @@ export function uiAutoSpecificationPlugin(): Plugin {
       lastConfigPath = findConfigFile(rootDir);
       await updateConfig(lastConfigPath);
     },
-    async buildStart() {
+    buildStart() {
       // 每次构建开始时清空缓存，确保使用最新配置生成组件
       clearEnhancedCache();
       console.log('[ui-auto-specification] 构建开始，已清空缓存目录');
